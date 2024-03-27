@@ -9,7 +9,6 @@ import ProfileRouter from "./routes/profile.js";
 import jwtAuth from "./middleware/isAuth.js";
 import { GlobalExceptionHandler } from './helper/index.js'
 
-
 const app = express();
 mongoose.connect(process.env.DATABASE_URL);
 
@@ -29,7 +28,7 @@ app.use(passport.session());
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.log(err);
   res.status(500).send("Something went wrong!");
 });
 
