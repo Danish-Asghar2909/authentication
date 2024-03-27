@@ -9,6 +9,38 @@ import mime from "mime-types";
 
 const router = express.Router();
 
+/**
+ * @swagger
+ *components:
+ *  schemas:
+ *    User:
+ *      type: object
+ *      properties:
+ *        _id:
+ *          type: string
+ *        username:
+ *          type: string
+ *        password:
+ *          type: string
+ *        email:
+ *          type: string
+ *        isAdmin:
+ *          type: boolean
+ *        isProfilePublic:
+ *          type: boolean
+ *        createdAt:
+ *          type: string
+ *          format: date-time
+ *        updatedAt:
+ *          type: string
+ *          format: date-time
+ *      required:
+ *        - username
+ *        - password
+ *        - email
+ *
+ */
+
 router.get("/", async (req, res) => {
   const user = req.user;
   const queryParams = { ...req.query };
@@ -48,6 +80,52 @@ router.get("/", async (req, res) => {
   return res.status(200).json({ data: users });
 });
 
+/**
+ * @swagger
+ * /profile:
+ *   get:
+ *     summary: Get users
+ *     description: Retrieve a list of users
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Maximum number of users to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *         description: Number of users to skip
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *         description: Field to sort the results by
+ *       - in: query
+ *         name: fields
+ *         schema:
+ *           type: string
+ *         description: Fields to include in the response
+ *       - in: query
+ *         name: populate
+ *         schema:
+ *           type: string
+ *         description: Fields to populate in the response
+ *     responses:
+ *       '200':
+ *         description: A list of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ */
+
 router.post("/upload", upload.single("file"), async (req, res) => {
   let fileS3Data = null;
   console.log(req.file);
@@ -72,6 +150,27 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 
   return res.status(201).json({ data: FileUrl });
 });
+
+/**
+ * @swagger
+ * /profile/upload:
+ *   post:
+ *     summary: Upload a file
+ *     description: Upload a file for a user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       '201':
+ *         description: File uploaded successfully
+ */
 
 router.get("/download", async (req, res) => {
   let fileLocation = req.query.fileLocation;
@@ -107,6 +206,24 @@ router.get("/download", async (req, res) => {
   return res;
 });
 
+/**
+ * @swagger
+ * /profile/download:
+ *   get:
+ *     summary: Download a file
+ *     description: Download a file for a user
+ *     parameters:
+ *       - in: query
+ *         name: fileLocation
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Location of the file to download
+ *     responses:
+ *       '200':
+ *         description: File downloaded successfully
+ */
+
 router.patch("/:id", async (req, res) => {
   const query = req.params.id;
   const isValidId = isValidMongoDbObjectId(query);
@@ -129,6 +246,55 @@ router.patch("/:id", async (req, res) => {
     return res.status(403).json({ message: "Please check the id!" });
   }
 });
+
+/**
+ * @swagger
+ * /profile/{id}:
+ *   patch:
+ *     summary: Update user by ID
+ *     description: Update user details by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the user to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               field1:
+ *                 type: string
+ *               field2:
+ *                 type: string
+ *             example:
+ *               field1: Updated Value
+ *               field2: Updated Value
+ *     responses:
+ *       '200':
+ *         description: User updated successfully
+ *       '403':
+ *         description: Invalid ID
+ *   get:
+ *     summary: Get user by ID
+ *     description: Retrieve user details by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the user to retrieve
+ *     responses:
+ *       '200':
+ *         description: User details retrieved successfully
+ *       '404':
+ *         description: User not found
+ */
 
 router.get("/:id", async (req, res) => {
   const id = req.params.id;
