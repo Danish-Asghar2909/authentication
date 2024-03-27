@@ -4,7 +4,11 @@ import "dotenv/config";
 import passport from "passport";
 import bodyParser from "body-parser";
 import session from "express-session";
-import AuthenticateRouter from './routes/authenticate.js';
+import AuthenticateRouter from "./routes/authenticate.js";
+import ProfileRouter from "./routes/profile.js";
+import jwtAuth from "./middleware/isAuth.js";
+import { GlobalExceptionHandler } from './helper/index.js'
+
 
 const app = express();
 mongoose.connect(process.env.DATABASE_URL);
@@ -29,14 +33,14 @@ app.use((err, req, res, next) => {
   res.status(500).send("Something went wrong!");
 });
 
+app.use("/api", AuthenticateRouter);
+app.use("/profile", jwtAuth, ProfileRouter);
 
-app.use('/api', AuthenticateRouter)
+app.get("/", async (req, res) => {
+  return res.status(200).send("Server is running");
+});
 
-
-app.get('/', async ( req, res )=>{
-    return res.status(200).send('Server is running')
-})
-
+app.use(GlobalExceptionHandler)
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   const db = mongoose.connection;

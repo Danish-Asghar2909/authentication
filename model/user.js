@@ -20,4 +20,4 @@ const UserScheme = new mongoose.Schema({
 });
 
 
-export default mongoose.model('authenticate' , UserScheme)
+export default mongoose.model('user' , UserScheme)

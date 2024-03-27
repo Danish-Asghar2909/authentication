@@ -80,7 +80,8 @@ router.post('/login', async (req, res) => {
     const data = {
       _id: user?._id, // important
       iat: now,
-      email: user?.email
+      email: user?.email,
+      isAdmin : user?.isAdmin
     };
     const jwtToken = jwt.sign(data, process.env.SECRET_KEY, { expiresIn: "14d" });
     res.status(200).json({ token : jwtToken });
